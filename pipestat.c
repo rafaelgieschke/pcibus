@@ -10,6 +10,7 @@
 #include <linux/namei.h>
 #include <linux/pipe_fs_i.h>
 #include <linux/stat.h>
+#include <linux/version.h>
 
 MODULE_LICENSE("GPL");
 
@@ -26,8 +27,13 @@ int init_module(void) {
   if (!S_ISFIFO(inode->i_mode)) goto error2;
   struct pipe_inode_info *pipe = inode->i_pipe;
   if (!pipe) goto error2;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 5, 0)
   pr_info("%s: ~ %ld B totally written, ~ %ld B currently buffered\n", path,
           pipe->head * PAGE_SIZE, (pipe->head - pipe->tail) * PAGE_SIZE);
+#else
+  pr_info("%s: buffer %d/%d, ~ %ld B currently buffered\n", path, pipe->curbuf,
+          pipe->buffers, pipe->nrbufs * PAGE_SIZE);
+#endif
   return -EBUSY;
 error2:
   path_put(&path2);
