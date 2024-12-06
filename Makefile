@@ -1,7 +1,15 @@
-modname = pipestat
-modsource = pipestat
+modname = debug
+modsource = debug
 
-all: $(modname).ko
+bus = 0
+device = 0
+function = 0
+
+run: $(modname).ko
+	sudo rmmod $(modname).ko || :
+	sudo insmod $(modname).ko bus=$(bus) device=$(device) function="$(function)" \
+	  2>&1 | tee /dev/stderr | grep -qi "resource busy"
+	dmesg | grep -- $(modname): | tail -20
 
 KDIR = /lib/modules/$(shell uname -r)/build
 ccflags-y += $(CFLAGS)
@@ -16,8 +24,3 @@ $(modname).ko: $(modsource).c
 
 clean:
 	make -C $(KDIR) M=$(PWD) clean
-
-test: $(modname).ko
-	sudo rmmod $(modname).ko || :
-	sudo insmod $(modname).ko path=$(path) || :
-	dmesg | grep -A10 -- $(modname):
