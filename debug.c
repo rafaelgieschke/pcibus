@@ -2,7 +2,7 @@
 
 #include <linux/pci.h>
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Dual MIT/GPL");
 
 static unsigned char bus = 0;
 module_param(bus, byte, 0);
